@@ -1,20 +1,21 @@
 #!/usr/bin/env python3
 
-import requests
-import base64
 import argparse
-import time
+import base64
 import json
 import os
+import time
 
 import mmh3
-from tqdm import tqdm
-from ipwhois import IPWhois
+import requests
 from bs4 import BeautifulSoup
-from shodan import Shodan
-from shodan.cli.helpers import get_api_key
 from fake_useragent import UserAgent
 from fake_useragent.errors import FakeUserAgentError
+from ipwhois import IPWhois
+from shodan import Shodan
+from shodan.cli.helpers import get_api_key
+from tqdm import tqdm
+
 
 class FavUp(object):
     def __init__(self, *args, **kwargs):
@@ -60,21 +61,20 @@ class FavUp(object):
             ap.add_argument('-fh', '--favicon-hash', help='Running from direct favicon hash number')
 
             ap.add_argument('-fl', '--favicon-list',
-                help="Iterate over a file that contains the full path of all the icons which you want to lookup.")
+                            help="Iterate over a file that contains the full path of all the icons which you want to lookup.")
             ap.add_argument('-ul', '--url-list',
-                help="Iterate over a file that contains the full URL of all the icons which you want to lookup.")
+                            help="Iterate over a file that contains the full URL of all the icons which you want to lookup.")
             ap.add_argument('-wl', '--web-list',
-                help="Iterate over a file that contains all the domains which you want to lookup.")
-            
-            ap.add_argument('-o', '--output', help="Specify output file, currently supported formats are CSV and JSON.")
+                            help="Iterate over a file that contains all the domains which you want to lookup.")
 
+            ap.add_argument('-o', '--output', help="Specify output file, currently supported formats are CSV and JSON.")
 
             args = self._argsCheck(ap.parse_args())
             self.key = args.key
             self.keyFile = args.key_file
-            self.shodanCLI   = args.shodan_cli
+            self.shodanCLI = args.shodan_cli
             self.faviconFile = [args.favicon_file] if args.favicon_file else []
-            self.faviconURL  = [args.favicon_url] if args.favicon_url else []
+            self.faviconURL = [args.favicon_url] if args.favicon_url else []
             self.faviconHashVal = [args.favicon_hash] if args.favicon_hash else []
             self.web = [args.web] if args.web else []
             self.fileList = self._serializeListFile(args.favicon_list) if args.favicon_list else []
@@ -82,7 +82,7 @@ class FavUp(object):
             self.webList = self._serializeListFile(args.web_list) if args.web_list else []
             self.output = args.output
 
-            self._iterator = tqdm(total=len(self.fileList)+len(self.urlList)+len(self.webList))
+            self._iterator = tqdm(total=len(self.fileList) + len(self.urlList) + len(self.webList))
 
             if self.output:
                 self._output = {
@@ -95,7 +95,6 @@ class FavUp(object):
             if self.output:
                 self._output['file'].close()
 
-    
     def _argsCheck(self, args):
         if not (args.key_file or args.key or args.shodan_cli):
             print('[x] Please specify the key with --key, --key-file or --shodan-cli.')
@@ -103,12 +102,13 @@ class FavUp(object):
 
         if not (args.favicon_file or args.favicon_url or args.web or
                 args.favicon_list or args.url_list or args.web_list or args.favicon_hash):
-            print('[x] Please specify the source of the favicon with --favicon-file, --favicon-url, --favicon-hash, --web'+
+            print(
+                '[x] Please specify the source of the favicon with --favicon-file, --favicon-url, --favicon-hash, --web' +
                 ', --favicon-list, --url-list or --web-list.')
             exit(1)
 
         return args
-    
+
     def _serializeListFile(self, inputFile):
         """ Remove whitespace chars and lines
         """
@@ -129,11 +129,11 @@ class FavUp(object):
         else:
             print('[x] Wrong input API key type.')
             exit(1)
-        
+
         if self.faviconHashVal:
             self._iterator.set_description(f"[+] Using Favicon Hash as parameter")
             self._iterator.update(1)
-            for fav in self.faviconHashVal:    
+            for fav in self.faviconHashVal:
                 _fH = fav
                 self.faviconsList.append({
                     'favhash': _fH,
@@ -151,15 +151,15 @@ class FavUp(object):
                     'favhash': _fH,
                     'file': fav,
                     '_origin': fav
-                    })
+                })
         if self.faviconURL or self.urlList:
             self.urlList.extend(self.faviconURL)
             for fav in self.urlList:
                 self._iterator.set_description(f"[+] iterating over favicon URLs | processing {fav}")
                 self._iterator.update(1)
                 headers = {
-                        'User-Agent': self.get_user_agent(),
-                    }
+                    'User-Agent': self.get_user_agent(),
+                }
                 data = requests.get(fav, stream=True, headers=headers, verify=False)
                 _dcL = self.deepConnectionLens(data)
                 data = data.content
@@ -171,7 +171,7 @@ class FavUp(object):
                     'maskIP': _dcL['mIP'],
                     'maskISP': _dcL['mISP'],
                     '_origin': fav
-                    })
+                })
         if self.web or self.webList:
             self.webList.extend(self.web)
             for w in self.webList:
@@ -184,7 +184,7 @@ class FavUp(object):
                     data = requests.get(f"https://{w}", stream=True, headers=headers, verify=False)
                     _dcL = self.deepConnectionLens(data)
                     data = self.searchFaviconHTML(f"https://{w}")
-                    if not isinstance(data, str):    
+                    if not isinstance(data, str):
                         _fH = self.faviconHash(data.content, web_source=True)
                     else:
                         _fH = "not-found"
@@ -198,7 +198,7 @@ class FavUp(object):
                     'maskIP': _dcL['mIP'],
                     'maskISP': _dcL['mISP'],
                     '_origin': w
-                    })
+                })
         _alreadyScanned = {}
 
         _aF = set([f for i in self.faviconsList for f in i])
@@ -207,11 +207,11 @@ class FavUp(object):
 
         _cObj = {}
         for f in _aF:
-            _cObj.update({f:''})
+            _cObj.update({f: ''})
 
         if self.output:
             if self._output['type'].lower() == 'csv':
-                self._output['file'].write(','.join(f for f in _aF)+'\n')
+                self._output['file'].write(','.join(f for f in _aF) + '\n')
 
         self._iterator.reset(total=len(self.faviconsList))
         for _fObject in self.faviconsList:
@@ -227,26 +227,26 @@ class FavUp(object):
                 _alreadyScanned.update({_fObject['favhash']: found_ips})
             found_ips = _alreadyScanned[_fObject['favhash']]
             _fObject.update({'found_ips': found_ips})
-            
+
             if self.show:
-                self._iterator.write("-"*25)
+                self._iterator.write("-" * 25)
                 self._iterator.write(f"[{_fObject['_origin']}]")
                 del _fObject['_origin']
                 for _atr in _fObject:
                     self._iterator.write(f"--> {_atr:<10} :: {_fObject[_atr]}")
-            
+
             if self.output:
                 _tcObj = _cObj
                 _tcObj.update(_fObject)
                 _t = self._output['type']
                 if _t.lower() == 'csv':
-                    self._output['file'].write(','.join(str(_tcObj[k]) for k in _tcObj)+'\n')
+                    self._output['file'].write(','.join(str(_tcObj[k]) for k in _tcObj) + '\n')
                 elif _t.lower() == 'json':
-                    self._output['file'].write(json.dumps(_tcObj)+'\n')
+                    self._output['file'].write(json.dumps(_tcObj) + '\n')
                 else:
                     self._iterator.write("[x] Output format not supported, closing.")
                     exit(1)
-    
+
     def faviconHash(self, data, web_source=None):
         if web_source:
             b64data = base64.encodebytes(data).decode()
@@ -284,17 +284,19 @@ class FavUp(object):
                 except AttributeError:
                     pass
         if mIP == 'not-found':
-            self._iterator.write(f"[x] There's problem when getting icon for {response.url.split('/')[2]} with status code: {response.status_code}" )
+            self._iterator.write(
+                f"[x] There's problem when getting icon for {response.url.split('/')[2]} with status code: {response.status_code}")
         return {
             'mIP': mIP,
             'mISP': mISP
         }
-    
+
     def get_user_agent(self):
         try:
             return self.ua.random
         except FakeUserAgentError:
             return "Mozilla/5.0 (X11; Linux x86_64; rv:69.0) Gecko/20100101 Firefox/69.0"
+
 
 if __name__ == '__main__':
     FavUpApp = FavUp(show=True)
