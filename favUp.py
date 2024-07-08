@@ -178,9 +178,10 @@ class FavUp:
                 headers = {'User-Agent': self.get_user_agent()}
                 response = requests.get(f"https://{website}", stream=True, headers=headers, verify=False)
                 connection_info = self.get_connection_info(response)
-                data = self.get_favicon_from_html(f"https://{website}")
-                if not isinstance(data, str):
-                    fav_hash = self.calculate_favicon_hash(data.content, web_source=True)
+                favicon_url = self.get_favicon_from_html(f"https://{website}")
+                if favicon_url:
+                    favicon_response = requests.get(favicon_url, verify=False)
+                    fav_hash = self.calculate_favicon_hash(favicon_response.content, web_source=True)
                 else:
                     fav_hash = "not-found"
             except requests.exceptions.ConnectionError:
@@ -244,8 +245,8 @@ class FavUp:
             icon_url = icon_link.get("href")
             if not icon_url.startswith("http"):
                 icon_url = f"{url}/{icon_url}"
-            return requests.get(icon_url, verify=False)
-        return "not-found"
+            return icon_url
+        return None
 
     def search_shodan(self, favhash: int) -> str:
         time.sleep(1)
