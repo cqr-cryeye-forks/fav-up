@@ -22,8 +22,8 @@ def main(target, output):
     # Инициализация Shodan API
     init_command = ["shodan", "init", api_key]
     stdout, stderr = run_subprocess(init_command)
-    print("Shodan init stdout:\n", stdout, "\n\n")
-    print("Shodan init stderr:\n", stderr, "\n\n")
+    print("Shodan init stdout:\n", stdout)
+    print("Shodan init stderr:\n", stderr)
 
     # Путь к файлу со списком фавиконов
     path_to_favicon_list: Final[pathlib.Path] = pathlib.Path(__file__).parent / "favicon.txt"
@@ -32,25 +32,25 @@ def main(target, output):
     if target.startswith("http://") or target.startswith("https://"):
         command1 = ["python3", "favup.py", "--shodan-cli", "--favicon-url", f"{target}/favicon.ico"]
         stdout, stderr = run_subprocess(command1)
-        print("Command1 stdout:\n", stdout, "\n\n")
-        print("Command1 stderr:\n", stderr, "\n\n")
+        print("Command1 stdout:\n", stdout)
+        print("Command1 stderr:\n", stderr)
 
         command2 = ["python3", "favup.py", "--key", api_key, "--favicon-url", f"{target}/favicon.ico"]
         stdout, stderr = run_subprocess(command2)
-        print("Command2 stdout:\n", stdout, "\n\n")
-        print("Command2 stderr:\n", stderr, "\n\n")
+        print("Command2 stdout:\n", stdout)
+        print("Command2 stderr:\n", stderr)
     else:
         command3 = ["python3", "favup.py", "--key", api_key, "--web", target]
         stdout, stderr = run_subprocess(command3)
-        print("Command3 stdout:\n", stdout, "\n\n")
-        print("Command3 stderr:\n", stderr, "\n\n")
+        print("Command3 stdout:\n", stdout)
+        print("Command3 stderr:\n", stderr)
 
     # Запуск с файлом, содержащим список фавиконов и сохранение в json
     command4 = ["python3", "favup.py", "--key", api_key, "--favicon-list", str(path_to_favicon_list), "--output",
                 output]
     stdout, stderr = run_subprocess(command4)
-    print("Command4 stdout:\n", stdout, "\n\n")
-    print("Command4 stderr:\n", stderr, "\n\n")
+    print("Command4 stdout:\n", stdout)
+    print("Command4 stderr:\n", stderr)
 
 
 if __name__ == '__main__':
