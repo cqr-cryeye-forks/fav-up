@@ -14,11 +14,14 @@ def run_subprocess(command):
         return None, None
 
 
-def main(target, output):
-    # Загрузка API ключа из файла
+def get_api_key():
     with open("shodan_key.txt", "r") as file:
         api_key = file.readline().strip()
+        return api_key
 
+
+def main(target, output):
+    api_key = get_api_key()
     # Инициализация Shodan API
     init_command = ["shodan", "init", api_key]
     stdout, stderr = run_subprocess(init_command)
@@ -53,6 +56,25 @@ def main(target, output):
     print("Command4 stderr:\n", stderr)
 
 
+def main2(target, output):
+    api_key = get_api_key()
+    if not target.startswith("http://") and not target.startswith("https://"):
+        target = "http://" + target
+    if target.startswith("http://"):
+        domain = target[7:]
+    if target.startswith("https://"):
+        domain = target[8:]
+    print(target)
+    print(domain)
+    command = ["python3", "favup.py", "--key", api_key, "--favicon-url", f"{target}/favicon.ico", "--web", domain,
+               "--output", output]
+    print(command)
+    OUTPUT, ERROR = run_subprocess(command)
+    print("ERROR\n", ERROR)
+    print("\n")
+    print("OUTPUT\n", OUTPUT)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Программа для обработки файлов.")
     parser.add_argument('--target', type=str, required=True, help='URL или домен.')
@@ -63,4 +85,4 @@ if __name__ == '__main__':
     target = args.target
     output = args.output
 
-    main(target, output)
+    main2(target, output)
