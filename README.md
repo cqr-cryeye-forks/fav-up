@@ -48,12 +48,12 @@ You can also save the results to a CSV/JSON file:
 ## Module
 
 ```python
-from favUp import FavUp
+from favup import FavUp
 
-f = FavUp()          
+f = FavUp()
 f.shodanCLI = True
 f.web = "domain.behind.cloudflare"
-f.show = True 
+f.show = True
 f.run()
 
 for result in f.faviconsList:
