@@ -1,8 +1,7 @@
 beautifulsoup4==4.9.3
-shodan==1.28.0
-mmh3==3.0.0
+shodan==1.31.0
+mmh3==4.1.0
 ipwhois==1.2.0
-requests>=2.22.0
-argparse==1.4.0
-tqdm>=4.32.0
-fake-useragent
+requests==2.32.3
+tqdm==4.66.4
+fake-useragent==1.5.1
