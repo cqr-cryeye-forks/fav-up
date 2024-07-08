@@ -67,8 +67,10 @@ class FavUp:
             print('[x] Please specify the key with --key, --key-file or --shodan-cli.')
             exit(1)
 
-        if not (args.favicon_file or args.favicon_url or args.web or args.favicon_list or args.url_list or args.web_list or args.favicon_hash):
-            print('[x] Please specify the source of the favicon with --favicon-file, --favicon-url, --favicon-hash, --web, --favicon-list, --url-list or --web-list.')
+        if not (
+                args.favicon_file or args.favicon_url or args.web or args.favicon_list or args.url_list or args.web_list or args.favicon_hash):
+            print(
+                '[x] Please specify the source of the favicon with --favicon-file, --favicon-url, --favicon-hash, --web, --favicon-list, --url-list or --web-list.')
             exit(1)
 
         self.api_key = args.key
@@ -226,7 +228,8 @@ class FavUp:
 
             if self.output:
                 if self.output_file['type'].lower() == 'csv':
-                    self.output_file['file'].write(','.join(str(fav_data.get(field, '')) for field in field_names) + '\n')
+                    self.output_file['file'].write(
+                        ','.join(str(fav_data.get(field, '')) for field in field_names) + '\n')
                 elif self.output_file['type'].lower() == 'json':
                     self.output_file['file'].write(json.dumps(fav_data) + '\n')
                 else:
@@ -267,7 +270,8 @@ class FavUp:
             if ip != 'not-found':
                 isp = IPWhois(ip).lookup_whois()['nets'][0]['name']
         if ip == 'not-found':
-            self.iterator.write(f"[x] Error getting icon for {response.url.split('/')[2]} with status code: {response.status_code}")
+            self.iterator.write(
+                f"[x] Error getting icon for {response.url.split('/')[2]} with status code: {response.status_code}")
         return {'ip': ip, 'isp': isp}
 
     def get_user_agent(self) -> str:
